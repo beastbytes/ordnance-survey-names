@@ -1,5 +1,5 @@
 # Ordnance Survey Names
-
+Wrapper for [Ordnance Survey Names API](https://www.ordnancesurvey.co.uk/products/os-names-api)
 
 
 For license information check the [LICENSE](LICENSE.md) file.

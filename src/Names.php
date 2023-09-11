@@ -7,17 +7,19 @@
 namespace BeastBytes\OrdnanceSurvey\Names;
 
 use BeastBytes\OrdnanceSurvey\OrdnanceSurvey;
-use GuzzleHttp\RequestOptions;
+use RuntimeException;
 
 /**
  * Implements the {@link https://osdatahub.os.uk/docs/names/overview Ordnance Survey Names API}.
  * See https://osdatahub.os.uk/docs/names/technicalSpecification for details.
  */
-class Names extends OrdnanceSurvey
+final class Names extends OrdnanceSurvey
 {
+    public const LATLNG2BNG_EXCEPTION = 'Unable to convert Lat/Lng to BNG';
+
     private const BOUNDING_BOX = 'BBOX:';
     private const LOCAL_TYPE = 'LOCAL_TYPE:';
-    private const API_NAME = 'names';
+    private const API_NAME = 'search/names';
     private const API_VERSION = 'v1';
 
     /**
@@ -51,7 +53,7 @@ class Names extends OrdnanceSurvey
      * Returns the closest address to a given point.
      *
      * @param string $key API key
-     * @param array $point BNG coordinates
+     * @param array<string, float> $point ['lat' => lat, 'lon' => lon]
      * @param array $options Additional options
      * @param array $filter Local type filters
      * @return array|bool|null Response data on success, FALSE on error
@@ -59,9 +61,14 @@ class Names extends OrdnanceSurvey
      */
     public static function nearest(string $key, array $point, array $options = [], array $filter = []): array|bool|null
     {
+        $bng = self::LatLng2Bng($point);
+        if ($bng === false) {
+            throw new RuntimeException(self::LATLNG2BNG_EXCEPTION);
+        }
+
         $qry = $options;
         $qry['key'] = $key;
-        $qry['point'] = implode(',', $point);
+        $qry['point'] = implode(',', $bng);
 
         if (!empty($filter)) {
             $qry['fq'] = self::LOCAL_TYPE . implode(' ' . self::LOCAL_TYPE, $filter);
