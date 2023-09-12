@@ -24,7 +24,7 @@ class NamesTest extends TestCase
         self::$apiKey = require __DIR__ . '/Support/apiKey.php';
     }
 
-    public static function findProvider(): Generator
+    public static function queryProvider(): Generator
     {
         foreach ([
             ['query' => 'Northampton'],
@@ -35,7 +35,7 @@ class NamesTest extends TestCase
         }
     }
 
-    public static function nearestProvider(): Generator
+    public static function pointProvider(): Generator
     {
         foreach ([
             'Heathrow' => ['point' => ['lat' => 51.47121514468652, 'lon' => -0.45364817429284376]],
@@ -49,7 +49,7 @@ class NamesTest extends TestCase
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    #[dataProvider('findProvider')]
+    #[dataProvider('queryProvider')]
     public function testFind(string $query): void
     {
         $result = Names::find(self::$apiKey, $query);
@@ -59,11 +59,10 @@ class NamesTest extends TestCase
         $this->assertIsArray($result[0][self::GAZETTEER_ENTRY]);
     }
 
-
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    #[dataProvider('nearestProvider')]
+    #[dataProvider('pointProvider')]
     public function testNearest(array $point): void
     {
         $result = Names::nearest(self::$apiKey, $point);
